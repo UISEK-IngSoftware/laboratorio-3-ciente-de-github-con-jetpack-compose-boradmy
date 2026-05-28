@@ -11,10 +11,12 @@ import androidx.compose.ui.unit.dp
 import ec.edu.uisek.githubclient.ui.components.RepoItem
 
 @Composable
-fun RepoList() {
+fun RepoList(
+    modifier: Modifier = Modifier
+) {
 
     Column(
-       modifier = Modifier
+       modifier = modifier
            .fillMaxSize()
            .padding(all = 16.dp)
     ){

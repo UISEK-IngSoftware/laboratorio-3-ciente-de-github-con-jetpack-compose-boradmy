@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import ec.edu.uisek.githubclient.ui.screens.RepoList
 import ec.edu.uisek.githubclient.ui.theme.GithubClientTheme
@@ -20,7 +21,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GithubClientTheme {
-                RepoList()
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    RepoList(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
