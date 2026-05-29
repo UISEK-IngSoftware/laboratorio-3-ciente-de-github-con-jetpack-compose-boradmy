@@ -1,48 +1,59 @@
 package ec.edu.uisek.githubclient.ui.screens
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ec.edu.uisek.githubclient.ui.components.RepoItem
+import ec.edu.uisek.githubclient.viewmodels.RepoListViewModel
 
 @Composable
 fun RepoList(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: RepoListViewModel = viewModel()
 ) {
+    val repos by viewModel.repos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMsg by viewModel.errorMsg.collectAsState()
 
-    Column(
-       modifier = modifier
-           .fillMaxSize()
-           .padding(all = 16.dp)
-    ){
-        RepoItem(
-            name = "Proyecto de Django",
-            description = "Un proyecto realizado en Django 5.2 para la materia de desarrollo Web",
-            avatarImg = "https://impulso06.com/wp-content/uploads/2023/11/Python-y-Django-Herramientas-esenciales-para-el-desarrollo-web-moderno.png",
-            language = "Python"
-        )
-        RepoItem(
-            name = "Proyecto de React",
-            description = "Un proyecto realizado en React 18.2.2 para la materia de desarrollo Web",
-            avatarImg = "https://images.icon-icons.com/3660/PNG/512/programming_tecnology_react_logo_native_icon_228491.png",
-            language = "Typescript"
-        )
-        RepoItem(
-            name = "Proyecto de Android",
-            description = "Un proyecto realizado en Kotlin para la materia de desarrollo Móvil",
-            avatarImg = "https://unaaldia.hispasec.com/wp-content/uploads/2014/10/f94e0-android-logo.png",
-            language = "Kotlin"
-        )
-        RepoItem(
-            name = "Proyecto de iOS",
-            description = "Un proyecto realizado en Swift para la materia de desarrollo Móvil",
-            avatarImg = "https://play-lh.googleusercontent.com/FCcziMA1_M9nGlJo6EnguMKlJ53Yor3tNmSqDUza9w9_wXrFLiAW2cOz-kD8S-N1Vvg",
-            language = "Swift"
-        )
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        errorMsg?.let { message ->
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+            )
+        }
+
+        if (!isLoading && errorMsg == null) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(repos) { repo ->
+                    RepoItem(repository = repo)
+                }
+            }
+        }
     }
 }
