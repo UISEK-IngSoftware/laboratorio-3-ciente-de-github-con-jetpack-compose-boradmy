@@ -99,7 +99,7 @@ fun RepoForm(
                 onClick = {
                     if (isEditMode) {
                         viewModel.updateRepo(
-                            oldName = repositoryToEdit!!.name,
+                            oldName = repositoryToEdit.name,
                             name = name,
                             description = description
                         )
