@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class RepoListViewModel : ViewModel() {
 
-    private val owner = "stiveenparedes"
+    private val owner = "borisyajamin"
 
     private val _repos = MutableStateFlow<List<Repository>>(emptyList())
     val repos: StateFlow<List<Repository>> = _repos.asStateFlow()
