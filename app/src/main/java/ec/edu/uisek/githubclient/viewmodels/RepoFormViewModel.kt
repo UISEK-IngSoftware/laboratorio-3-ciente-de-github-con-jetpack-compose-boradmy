@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 class RepoFormViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.apiService
-    private val owner = "boradmy"
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -23,20 +22,15 @@ class RepoFormViewModel : ViewModel() {
     private val _isSuccess = MutableStateFlow(false)
     val isSuccess: StateFlow<Boolean> = _isSuccess.asStateFlow()
 
-    fun createRepo(name: String, description: String) {
+    fun createRepo(name: String, description: String?) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
 
             try {
-                val repository = RepositoryPayload(
-                    name = name,
-                    description = description
-                )
-
+                val repository = RepositoryPayload(name = name, description = description)
                 apiService.createRepository(repository)
                 _isSuccess.value = true
-
             } catch (e: Exception) {
                 _errorMsg.value = "Error al crear el repositorio: ${e.localizedMessage}"
                 e.printStackTrace()
@@ -46,25 +40,24 @@ class RepoFormViewModel : ViewModel() {
         }
     }
 
-    fun updateRepo(oldName: String, name: String, description: String) {
+    fun updateRepo(oldName: String, name: String, description: String?) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
 
             try {
-                val repository = RepositoryPayload(
-                    name = name,
-                    description = description
-                )
+                val repository = RepositoryPayload(name = name, description = description)
 
-                apiService.updateRepository(
-                    owner = owner,
-                    oldName = oldName,
-                    repository = repository
-                )
+                val userResponse = apiService.getAuthenticatedUser()
+                if (userResponse.isSuccessful) {
+                    val owner = userResponse.body()?.login
+                        ?: throw Exception("No se pudo obtener el usuario autenticado")
 
-                _isSuccess.value = true
-
+                    apiService.updateRepository(owner = owner, oldName = oldName, repository = repository)
+                    _isSuccess.value = true
+                } else {
+                    _errorMsg.value = "Error al obtener usuario: ${userResponse.code()} ${userResponse.message()}"
+                }
             } catch (e: Exception) {
                 _errorMsg.value = "Error al actualizar el repositorio: ${e.localizedMessage}"
                 e.printStackTrace()

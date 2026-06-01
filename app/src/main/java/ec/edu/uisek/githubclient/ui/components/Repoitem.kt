@@ -72,17 +72,17 @@ fun RepoItem(
 
 @Preview(showBackground = true)
 @Composable
-fun RepoItemPreview(){
-    val repository = Repository (
+fun RepoItemPreview() {
+    val repository = Repository(
         id = "1",
         name = "Repo Name",
         owner = GithubUser(
             id = "1",
-            name = "Owner Name",
+            login = "OwnerLogin",
             avatarUrl = "https://avatars.githubusercontent.com/u/168299135?v=4"
         ),
         description = "Repo Description",
         language = "Kotlin"
     )
-    RepoItem( repository )
+    RepoItem(repository)
 }

@@ -2,6 +2,7 @@ package ec.edu.uisek.githubclient.services
 
 import ec.edu.uisek.githubclient.models.Repository
 import ec.edu.uisek.githubclient.models.RepositoryPayload
+import ec.edu.uisek.githubclient.models.GithubUser
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -39,4 +40,8 @@ interface ApiService {
         @Path("repo") oldName: String,
         @Body repository: RepositoryPayload
     ): Repository
+
+    // ✅ Endpoint correcto para obtener el usuario autenticado
+    @GET("user")
+    suspend fun getAuthenticatedUser(): Response<GithubUser>
 }

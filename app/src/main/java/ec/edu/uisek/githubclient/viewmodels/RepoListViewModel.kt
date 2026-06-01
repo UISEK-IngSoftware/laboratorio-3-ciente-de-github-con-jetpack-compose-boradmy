@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class RepoListViewModel : ViewModel() {
 
-    private val owner = "boradmy"
+    private val apiService = RetrofitClient.apiService
 
     private val _repos = MutableStateFlow<List<Repository>>(emptyList())
     val repos: StateFlow<List<Repository>> = _repos.asStateFlow()
@@ -30,11 +30,11 @@ class RepoListViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
-
             try {
-                _repos.value = RetrofitClient.apiService.getRepositories()
+                _repos.value = apiService.getRepositories()
             } catch (e: Exception) {
                 _errorMsg.value = "Error al cargar repositorios: ${e.localizedMessage}"
+                e.printStackTrace()
             } finally {
                 _isLoading.value = false
             }
@@ -45,21 +45,24 @@ class RepoListViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
-
             try {
-                val response = RetrofitClient.apiService.deleteRepository(
-                    owner = owner,
-                    repoName = name
-                )
+                val userResponse = apiService.getAuthenticatedUser()
+                if (userResponse.isSuccessful) {
+                    val owner = userResponse.body()?.login
+                        ?: throw Exception("No se pudo obtener el usuario autenticado")
 
-                if (response.isSuccessful) {
-                    _repos.value = _repos.value.filter { it.name != name }
+                    val response = apiService.deleteRepository(owner, name)
+                    if (response.isSuccessful) {
+                        fetchRepos()
+                    } else {
+                        _errorMsg.value = "Error al eliminar: ${response.code()} ${response.message()}"
+                    }
                 } else {
-                    _errorMsg.value = "Error al eliminar repositorio: HTTP ${response.code()}"
+                    _errorMsg.value = "Error al obtener usuario: ${userResponse.code()} ${userResponse.message()}"
                 }
-
             } catch (e: Exception) {
                 _errorMsg.value = "Error al eliminar repositorio: ${e.localizedMessage}"
+                e.printStackTrace()
             } finally {
                 _isLoading.value = false
             }
