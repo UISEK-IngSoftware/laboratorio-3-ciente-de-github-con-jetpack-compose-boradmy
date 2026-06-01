@@ -6,4 +6,5 @@ data class Repository(
     val owner: GithubUser,
     val description: String?,
     val language: String?,
+
 )

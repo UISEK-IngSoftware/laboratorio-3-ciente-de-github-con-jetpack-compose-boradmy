@@ -5,6 +5,6 @@ import com.google.gson.annotations.SerializedName
 data class GithubUser(
     val id: String,
     val name: String,
-    @SerializedName(value = "avatar_url")
-    val avatarUrl: String
+    @SerializedName("avatar_url")
+    val avatarUrl: String,
 )
