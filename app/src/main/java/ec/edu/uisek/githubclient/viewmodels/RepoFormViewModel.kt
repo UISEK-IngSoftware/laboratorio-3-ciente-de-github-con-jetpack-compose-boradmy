@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class RepoFormViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.apiService
-    private val owner = "borisyajamin"
+    private val owner = "boradmy"
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

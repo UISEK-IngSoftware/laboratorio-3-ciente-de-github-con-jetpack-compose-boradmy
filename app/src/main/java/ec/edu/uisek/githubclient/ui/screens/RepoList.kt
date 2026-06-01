@@ -1,38 +1,18 @@
 package ec.edu.uisek.githubclient.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,12 +20,6 @@ import ec.edu.uisek.githubclient.models.Repository
 import ec.edu.uisek.githubclient.ui.components.RepoItem
 import ec.edu.uisek.githubclient.ui.theme.GithubClientTheme
 import ec.edu.uisek.githubclient.viewmodels.RepoListViewModel
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 
 @Composable
 fun RepoList(
@@ -80,11 +54,8 @@ fun RepoList(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-
             if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
             errorMsg?.let { message ->
@@ -98,18 +69,12 @@ fun RepoList(
             }
 
             if (!isLoading && errorMsg == null) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(repos.size) { index ->
                         SwipeRepoItem(
                             repository = repos[index],
-                            onEdit = {
-                                onEditRepo(repos[index])
-                            },
-                            onDelete = {
-                                viewModel.deleteRepo(repos[index].name)
-                            }
+                            onEdit = { onEditRepo(repos[index]) },
+                            onDelete = { viewModel.deleteRepo(repos[index].name) }
                         )
                     }
                 }
@@ -125,57 +90,42 @@ fun SwipeRepoItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-
-    var showDeleteDialog by remember {
-        mutableStateOf(false)
-    }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
-            value == SwipeToDismissBoxValue.EndToStart
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> { // derecha → eliminar
+                    showDeleteDialog = true
+                    false
+                }
+                SwipeToDismissBoxValue.EndToStart -> { // izquierda → editar
+                    onEdit()
+                    false
+                }
+                else -> true
+            }
         }
     )
 
     if (showDeleteDialog) {
-
         AlertDialog(
-            onDismissRequest = {
-                showDeleteDialog = false
-            },
-
-            title = {
-                Text("Eliminar repositorio")
-            },
-
-            text = {
-                Text(
-                    "¿Seguro que deseas eliminar el repositorio \"${repository.name}\"?"
-                )
-            },
-
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Eliminar repositorio") },
+            text = { Text("¿Seguro que deseas eliminar \"${repository.name}\"?") },
             confirmButton = {
-
                 Button(
                     onClick = {
                         showDeleteDialog = false
                         onDelete()
                     },
-
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
                     )
-                ) {
-                    Text("Sí")
-                }
+                ) { Text("Sí") }
             },
-
             dismissButton = {
-
-                OutlinedButton(
-                    onClick = {
-                        showDeleteDialog = false
-                    }
-                ) {
+                OutlinedButton(onClick = { showDeleteDialog = false }) {
                     Text("Cancelar")
                 }
             }
@@ -184,70 +134,41 @@ fun SwipeRepoItem(
 
     SwipeToDismissBox(
         state = dismissState,
-
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
-
+        enableDismissFromStartToEnd = true,   // swipe derecha habilitado
+        enableDismissFromEndToStart = true,   // swipe izquierda habilitado
         backgroundContent = {
-
+            val direction = dismissState.dismissDirection
+            val color = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Color.Red       // eliminar → rojo
+                SwipeToDismissBoxValue.EndToStart -> Color.Blue      // editar → azul
+                else -> Color.Transparent
+            }
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .background(color)
                     .padding(horizontal = 16.dp),
-
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = if (direction == SwipeToDismissBoxValue.StartToEnd)
+                    Arrangement.Start else Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Button(
-                    onClick = onEdit,
-
-                    modifier = Modifier.padding(end = 8.dp),
-
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF9800),
-                        contentColor = Color.White
-                    )
-                ) {
-
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar"
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text("Editar")
-                }
-
-                Button(
-                    onClick = {
-                        showDeleteDialog = true
-                    },
-
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = Color.White
-                    )
-                ) {
-
+                if (direction == SwipeToDismissBoxValue.StartToEnd) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar"
+                        contentDescription = "Eliminar",
+                        tint = Color.White
                     )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text("Eliminar")
+                } else if (direction == SwipeToDismissBoxValue.EndToStart) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = Color.White
+                    )
                 }
             }
         }
     ) {
-
-        RepoItem(
-            repository = repository
-        )
+        RepoItem(repository = repository)
     }
 }
 
