@@ -151,7 +151,7 @@ fun SwipeRepoItem(
             }
         )
     }
-
+//a
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = true,   // swipe derecha habilitado
