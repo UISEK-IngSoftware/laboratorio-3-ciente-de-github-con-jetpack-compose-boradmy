@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "ec.edu.uisek.githubclient"
-    compileSdk = 36 // Cambiado a 35 por estabilidad actual
+    compileSdk = 36 // estable actualmente
 
     defaultConfig {
         applicationId = "ec.edu.uisek.githubclient"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -25,9 +25,7 @@ android {
         if (propertiesFile.exists()) {
             propertiesFile.inputStream().use { properties.load(it) }
         }
-
         val githubToken = properties.getProperty("GITHUB_TOKEN") ?: ""
-        // Importante: las comillas escapadas son necesarias para que sea un String en Java/Kotlin
         buildConfigField("String", "GITHUB_TOKEN", "\"$githubToken\"")
     }
 
@@ -41,11 +39,12 @@ android {
         }
     }
 
-    // Actualizado a Java 17 para evitar conflictos con librerías de red
+    // Actualizado a Java 17
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -60,25 +59,31 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Librerías adicionales
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    // --- RETROFIT VERSION ESTABLE 2.9.0 ---
+
+    // Retrofit y Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    // --- OKHTTP LOGGING INTERCEPTOR ESTABLE 4.12.0 ---
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+
 }
