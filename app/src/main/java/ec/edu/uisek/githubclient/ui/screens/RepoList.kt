@@ -30,6 +30,12 @@ fun RepoList(
     onEditRepo: (Repository) -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
+    // 🔧 FIX: recarga la lista cada vez que se entra a esta pantalla,
+    // asegurando que el token ya esté disponible (evita el 401 en caliente).
+    LaunchedEffect(Unit) {
+        viewModel.fetchRepos()
+    }
+
     val repos by viewModel.repos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.errorMsg.collectAsState()
@@ -151,16 +157,16 @@ fun SwipeRepoItem(
             }
         )
     }
-//a
+
     SwipeToDismissBox(
         state = dismissState,
-        enableDismissFromStartToEnd = true,   // swipe derecha habilitado
-        enableDismissFromEndToStart = true,   // swipe izquierda habilitado
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
         backgroundContent = {
             val direction = dismissState.dismissDirection
             val color = when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> Color.Red       // eliminar → rojo
-                SwipeToDismissBoxValue.EndToStart -> Color.Blue      // editar → azul
+                SwipeToDismissBoxValue.StartToEnd -> Color.Red
+                SwipeToDismissBoxValue.EndToStart -> Color.Blue
                 else -> Color.Transparent
             }
             Row(

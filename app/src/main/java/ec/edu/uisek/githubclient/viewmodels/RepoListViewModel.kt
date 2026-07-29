@@ -22,9 +22,9 @@ class RepoListViewModel : ViewModel() {
     private val _errorMsg = MutableStateFlow<String?>(null)
     val errorMsg: StateFlow<String?> = _errorMsg.asStateFlow()
 
-    init {
-        fetchRepos()
-    }
+    // 🔧 FIX: se eliminó el init { fetchRepos() }.
+    // Ahora RepoList.kt controla cuándo se llama fetchRepos(),
+    // vía LaunchedEffect, garantizando que el token ya exista.
 
     fun fetchRepos() {
         viewModelScope.launch {
